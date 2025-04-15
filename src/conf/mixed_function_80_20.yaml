@@ -1,0 +1,26 @@
+inherit:
+    - mixed_function_base.yaml
+
+training:
+    task_kwargs:
+        function_types: ['linear', 'quadratic']  # Start with two function types
+        distribution: 'weighted'
+        weights: [0.8, 0.2]  # 80% linear, 20% quadratic
+    curriculum:
+        stages:
+            - functions: ['linear', 'quadratic']
+              weights: [0.8, 0.2]
+              threshold: 0.15
+              steps: 100000
+            - functions: ['linear', 'quadratic', 'neural_net']
+              weights: [0.8, 0.1, 0.1]
+              threshold: 0.2
+              steps: 150000
+            - functions: ['linear', 'quadratic', 'neural_net', 'decision_tree']
+              weights: [0.8, 0.067, 0.067, 0.066]
+              threshold: 0.25
+              steps: 150000
+
+wandb:
+    name: "mixed_function_80_20"
+    tags: ["mixed", "curriculum", "weighted", "80-20"]

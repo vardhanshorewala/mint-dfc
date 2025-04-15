@@ -2,6 +2,7 @@ import os
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 from eval import get_run_metrics, baseline_names, get_model_from_run
 from models import build_model
@@ -32,6 +33,12 @@ relevant_model_names = {
         "XGBoost",
     ],
     "relu_2nn_regression": [
+        "Transformer",
+        "Least Squares",
+        "3-Nearest Neighbors",
+        "2-layer NN, GD",
+    ],
+    "mixed_function": [
         "Transformer",
         "Least Squares",
         "3-Nearest Neighbors",
@@ -112,3 +119,62 @@ def collect_results(run_dir, df, valid_row=None, rename_eval=None, rename_model=
                 all_metrics[eval_name] = {}
             all_metrics[eval_name].update(processed_results)
     return all_metrics
+
+
+def plot_mixed_function_metrics(metrics, function_types):
+    """Plot metrics for mixed function experiments."""
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    axes = axes.flatten()
+
+    # Plot per-class MSE
+    for i, func_type in enumerate(function_types):
+        mse = metrics[f'mse_{func_type}']
+        axes[0].plot(mse['mean'], label=func_type, color=palette[i])
+        axes[0].fill_between(
+            range(len(mse['mean'])),
+            mse['bootstrap_low'],
+            mse['bootstrap_high'],
+            alpha=0.3
+        )
+    axes[0].set_title('Per-Class MSE')
+    axes[0].set_xlabel('In-context examples')
+    axes[0].set_ylabel('MSE')
+    axes[0].legend()
+
+    # Plot adaptation speed
+    adaptation = metrics['adaptation_speed']
+    axes[1].plot(adaptation['steps'], adaptation['error'], label='Average Error')
+    axes[1].set_title('Adaptation Speed')
+    axes[1].set_xlabel('Training Steps')
+    axes[1].set_ylabel('Error')
+
+    # Plot class distribution
+    if 'class_distribution' in metrics:
+        dist = metrics['class_distribution']
+        axes[2].bar(range(len(function_types)), dist, tick_label=function_types)
+        axes[2].set_title('Class Distribution')
+        axes[2].set_ylabel('Frequency')
+
+    # Plot confusion matrix if available
+    if 'class_confusion' in metrics:
+        conf_mat = metrics['class_confusion']
+        sns.heatmap(conf_mat, ax=axes[3], xticklabels=function_types,
+                   yticklabels=function_types, annot=True, fmt='.2f')
+        axes[3].set_title('Class Confusion Matrix')
+
+    plt.tight_layout()
+    return fig, axes
+
+
+def collect_mixed_function_results(run_dir, df, curriculum_manager=None):
+    """Collect results specifically for mixed function experiments."""
+    metrics = collect_results(run_dir, df)
+
+    # Add mixed function specific metrics
+    for eval_name, results in metrics.items():
+        if curriculum_manager is not None:
+            active_funcs = curriculum_manager.get_active_functions()
+            results['active_functions'] = active_funcs
+            results['curriculum_stage'] = curriculum_manager.get_progress()
+
+    return metrics

@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 import torch
 
@@ -60,6 +61,7 @@ def get_task_sampler(
         "quadratic_regression": QuadraticRegression,
         "relu_2nn_regression": Relu2nnRegression,
         "decision_tree": DecisionTree,
+        "mixed_function": MixedFunctionTask,
     }
     if task_name in task_names_to_classes:
         task_cls = task_names_to_classes[task_name]
@@ -334,6 +336,127 @@ class DecisionTree(Task):
     @staticmethod
     def generate_pool_dict(n_dims, num_tasks, hidden_layer_size=4, **kwargs):
         raise NotImplementedError
+
+    @staticmethod
+    def get_metric():
+        return squared_error
+
+    @staticmethod
+    def get_training_metric():
+        return mean_squared_error
+
+
+class MixedFunctionTask(Task):
+    def __init__(self, n_dims, batch_size, pool_dict=None, seeds=None, function_types=None, weights=None):
+        """
+        Initialize a mixed function task that can generate examples from multiple function classes.
+
+        Args:
+            n_dims: Input dimension
+            batch_size: Number of functions to sample
+            pool_dict: Dictionary of pre-generated function parameters
+            seeds: Random seeds for reproducibility
+            function_types: List of function types to sample from. If None, uses all available types.
+            weights: Optional weights for sampling function types. If None, uses uniform distribution.
+        """
+        super(MixedFunctionTask, self).__init__(n_dims, batch_size, pool_dict, seeds)
+
+        # Available function types
+        self.available_types = {
+            'linear': LinearRegression,
+            'quadratic': QuadraticRegression,
+            'neural_net': Relu2nnRegression,
+            'decision_tree': DecisionTree
+        }
+
+        # Set active function types
+        self.function_types = function_types or list(self.available_types.keys())
+        self.weights = weights
+
+        # Initialize function instances for each type
+        self.function_instances = {}
+        for f_type in self.function_types:
+            self.function_instances[f_type] = self.available_types[f_type](
+                n_dims=n_dims,
+                batch_size=batch_size,
+                pool_dict=pool_dict,
+                seeds=seeds
+            )
+
+        # Sample function types for the batch
+        self._sample_batch_types()
+
+    def _sample_batch_types(self):
+        """Sample function types for the current batch based on weights."""
+        if self.weights is None:
+            # Uniform distribution
+            self.batch_types = np.random.choice(self.function_types, size=self.b_size)
+        else:
+            # Weighted distribution
+            self.batch_types = np.random.choice(
+                self.function_types,
+                size=self.b_size,
+                p=self.weights
+            )
+
+        # Store type indices for metrics
+        self.batch_type_indices = [self.function_types.index(t) for t in self.batch_types]
+
+    def evaluate(self, xs_b):
+        """
+        Evaluate each function in the batch according to its assigned type.
+        """
+        ys_b = torch.zeros_like(xs_b[:, :, 0])  # Output shape: [batch_size, sequence_length]
+
+        # Evaluate each function according to its type
+        for i, f_type in enumerate(self.batch_types):
+            func = self.function_instances[f_type]
+            ys_b[i] = func.evaluate(xs_b[i:i+1])[0]
+
+        return ys_b
+
+    def get_batch_info(self):
+        """
+        Get information about the current batch's function types.
+        """
+        return {
+            'types': self.batch_types,
+            'type_indices': self.batch_type_indices,
+            'available_types': self.function_types
+        }
+
+    def update_distribution(self, function_types=None, weights=None):
+        """
+        Update the function type distribution.
+
+        Args:
+            function_types: New list of function types to use
+            weights: New weights for sampling function types
+        """
+        if function_types is not None:
+            self.function_types = function_types
+            # Initialize any new function instances needed
+            for f_type in function_types:
+                if f_type not in self.function_instances:
+                    self.function_instances[f_type] = self.available_types[f_type](
+                        n_dims=self.n_dims,
+                        batch_size=self.b_size,
+                        pool_dict=self.pool_dict,
+                        seeds=self.seeds
+                    )
+
+        self.weights = weights
+        self._sample_batch_types()
+
+    def generate_pool_dict(self, n_dims, num_tasks, **kwargs):
+        """
+        Generate a pool of function parameters for all function types.
+        """
+        pool_dict = {}
+        for f_type, f_class in self.available_types.items():
+            if hasattr(f_class, 'generate_pool_dict'):
+                pool_dict[f_type] = f_class.generate_pool_dict(n_dims, num_tasks, **kwargs)
+        return pool_dict
 
     @staticmethod
     def get_metric():
