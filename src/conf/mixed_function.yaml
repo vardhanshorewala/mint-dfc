@@ -14,7 +14,7 @@ training:
     data: gaussian
     task_kwargs:
         function_types: ['linear', 'quadratic', 'neural_net', 'decision_tree']
-        distribution: 'uniform'  # uniform distribution across function types
+        # distribution: 'uniform'  # uniform distribution across function types
     batch_size: 64
     learning_rate: 0.0001
     save_every_steps: 1000
