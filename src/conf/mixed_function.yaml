@@ -1,0 +1,38 @@
+inherit:
+    - models/standard.yaml
+    - wandb.yaml
+
+model:
+    n_dims: 20
+    n_positions: 50
+    n_embd: 128
+    n_layer: 12
+    n_head: 8
+
+training:
+    task: mixed_function
+    data: gaussian
+    task_kwargs:
+        function_types: ['linear', 'quadratic', 'neural_net', 'decision_tree']
+        distribution: 'uniform'  # uniform distribution across function types
+    batch_size: 64
+    learning_rate: 0.0001
+    save_every_steps: 1000
+    keep_every_steps: 100000
+    train_steps: 500000
+    curriculum:
+        dims:
+            start: 20
+            end: 20
+            inc: 1
+            interval: 2000
+        points:
+            start: 50
+            end: 50
+            inc: 2
+            interval: 2000
+
+out_dir: ../models/mixed_function
+
+wandb:
+    name: "mixed_function_base"
