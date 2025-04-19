@@ -1,0 +1,27 @@
+{
+    "os": "Linux-6.8.0-1025-gcp-x86_64-with-glibc2.34",
+    "python": "3.8.12",
+    "heartbeatAt": "2025-04-19T03:56:20.564431",
+    "startedAt": "2025-04-19T03:56:17.529624",
+    "docker": null,
+    "gpu": "NVIDIA A100-SXM4-40GB",
+    "gpu_count": 1,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": [
+        "--config",
+        "conf/mixed_function.yaml"
+    ],
+    "state": "running",
+    "program": "train.py",
+    "codePath": "src/train.py",
+    "git": {
+        "remote": "git@github.com:vardhanshorewala/mint-dfc.git",
+        "commit": "f14af24a1370a63021786cbbbc7f0981e281c871"
+    },
+    "email": "vardhanshorewala@berkeley.edu",
+    "root": "/home/ubuntu/mint-dfc",
+    "host": "client-instance-3g2tmjkq",
+    "username": "ubuntu",
+    "executable": "/home/ubuntu/.pyenv/versions/3.8.12/bin/python"
+}
