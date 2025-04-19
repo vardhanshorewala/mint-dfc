@@ -1,0 +1,45 @@
+config: conf/mixed_function.yaml
+inherit:
+- /home/ubuntu/mint-dfc/src/conf/models/standard.yaml
+- /home/ubuntu/mint-dfc/src/conf/wandb.yaml
+model:
+  family: gpt2
+  n_dims: 5
+  n_embd: 128
+  n_head: 8
+  n_layer: 12
+  n_positions: 11
+out_dir: ../models/mixed_function/90fff494-303e-43eb-b811-1502a3cf1fa8
+test_run: false
+training:
+  batch_size: 64
+  curriculum:
+    dims:
+      end: 5
+      inc: 1
+      interval: 2000
+      start: 5
+    points:
+      end: 11
+      inc: 2
+      interval: 2000
+      start: 11
+  data: gaussian
+  keep_every_steps: 100000
+  learning_rate: 0.0001
+  num_tasks: null
+  num_training_examples: null
+  resume_id: null
+  save_every_steps: 1000
+  task: mixed_function
+  task_kwargs:
+    function_types:
+    - linear
+    - quadratic
+  train_steps: 100
+wandb:
+  entity: your-entity
+  log_every_steps: 100
+  name: mixed_function_base
+  notes: ''
+  project: in-context-training
