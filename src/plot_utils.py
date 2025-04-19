@@ -42,7 +42,6 @@ relevant_model_names = {
         "Transformer",
         "Least Squares",
         "3-Nearest Neighbors",
-        "2-layer NN, GD",
     ],
 }
 
