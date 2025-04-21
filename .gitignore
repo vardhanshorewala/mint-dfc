@@ -56,3 +56,5 @@ Pipfile.lock
 # MacOS / Linux system files
 .DS_Store
 Thumbs.db
+
+mint-dfc/models

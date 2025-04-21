@@ -208,6 +208,33 @@ def build_evals(conf):
     evaluation_kwargs = {}
 
     evaluation_kwargs["standard"] = {"prompting_strategy": "standard"}
+
+    # Add mixed function specific evaluations
+    if task_name == "mixed_function":
+        # Get function types from config
+        function_types = conf.training.task_kwargs.get("function_types", [])
+
+        # Add per-function type evaluation
+        for f_type in function_types:
+            evaluation_kwargs[f"function_{f_type}"] = {
+                "task_sampler_kwargs": {
+                    "function_types": [f_type]  # Test only this function type
+                }
+            }
+
+        # Add combined function evaluation
+        evaluation_kwargs["combined"] = {
+            "task_sampler_kwargs": {
+                "function_types": function_types  # Test all functions together
+            }
+        }
+
+        # Return here to avoid linear regression specific tests
+        for name, kwargs in evaluation_kwargs.items():
+            evaluation_kwargs[name] = base_kwargs.copy()
+            evaluation_kwargs[name].update(kwargs)
+        return evaluation_kwargs
+
     if task_name != "linear_regression":
         if task_name in ["relu_2nn_regression"]:
             evaluation_kwargs["linear_regression"] = {"task_name": "linear_regression"}
@@ -261,6 +288,26 @@ def build_evals(conf):
     return evaluation_kwargs
 
 
+def print_mixed_function_metrics(all_metrics):
+    """Print metrics for each function type in mixed function evaluation."""
+    print("\n=== Mixed Function Evaluation Results ===")
+
+    for eval_name, metrics in all_metrics.items():
+        if eval_name.startswith('function_'):
+            function_type = eval_name.replace('function_', '')
+            print(f"\n{function_type.upper()} Metrics:")
+            for model_name, model_metrics in metrics.items():
+                print(f"  Model: {model_name}")
+                print(f"    Mean Error: {model_metrics['mean']}")
+                print(f"    Std Dev: {model_metrics['std']}")
+
+    if 'combined' in all_metrics:
+        print("\nCOMBINED Performance:")
+        for model_name, model_metrics in all_metrics['combined'].items():
+            print(f"  Model: {model_name}")
+            print(f"    Mean Error: {model_metrics['mean']}")
+            print(f"    Std Dev: {model_metrics['std']}")
+
 def compute_evals(all_models, evaluation_kwargs, save_path=None, recompute=False):
     try:
         with open(save_path) as fp:
@@ -282,6 +329,10 @@ def compute_evals(all_models, evaluation_kwargs, save_path=None, recompute=False
     if save_path is not None:
         with open(save_path, "w") as fp:
             json.dump(all_metrics, fp, indent=2)
+
+    # Print metrics if it's a mixed function evaluation
+    if any(k.startswith('function_') for k in all_metrics.keys()):
+        print_mixed_function_metrics(all_metrics)
 
     return all_metrics
 

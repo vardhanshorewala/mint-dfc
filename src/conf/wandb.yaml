@@ -1,5 +1,7 @@
 wandb:
     project: in-context-training
-    entity: your-entity
+    entity: soamdesai-university-of-california-berkeley
     notes:
     log_every_steps: 100
+    name: linear_regression_toy
+

@@ -13,11 +13,11 @@ training:
             inc: 2
             interval: 2000
   task_kwargs:
-    function_types: ['linear', 'quadratic']   # add more as you wish
-
+    function_types: ['linear', 'quadratic', 'neural_net', 'decision_tree']
+    weights: [0.25, 0.25, 0.25, 0.25]  # Equal distribution
 
 # ── output & logging ───────────────────────────────────────────────────────────
 out_dir: ../models/mixed_function
 
 wandb:
-  name: mixed_function_base   # appears on your wandb dashboard
+  name: mixed_function_all_types   # appears on your wandb dashboard
