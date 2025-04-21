@@ -3,8 +3,7 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *$py.class
-models/
-
+models/**
 # C extensions
 *.so
 
@@ -58,3 +57,4 @@ Pipfile.lock
 # MacOS / Linux system files
 .DS_Store
 Thumbs.db
+models/**/*.pt
