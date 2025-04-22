@@ -1,7 +1,7 @@
 wandb:
     project: in-context-training
-    entity: soamdesai-university-of-california-berkeley
+    entity: ashokrd
     notes:
     log_every_steps: 100
-    name: linear_regression_toy
+    name: mixed_function_base
 
