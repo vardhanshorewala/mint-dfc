@@ -1,0 +1,60 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+# C extensions
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# VSCode and PyCharm settings
+.vscode/
+.idea/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+
+# Pyre
+.pyre/
+
+# Pipenv
+Pipfile.lock
+
+# Local dotenv file
+.env
+
+# MacOS / Linux system files
+.DS_Store
+Thumbs.db
+
+mint-dfc/models

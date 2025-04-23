@@ -1,0 +1,23 @@
+# src/conf/mixed_function.yaml
+inherit:
+  - base.yaml          # ← pulls in model/standard + wandb via base.yaml
+
+# ── training overrides ─────────────────────────────────────────────────────────
+training:
+  task: mixed_function
+  data: gaussian
+  curriculum:
+        points:
+            start: 11
+            end: 41
+            inc: 2
+            interval: 2000
+  task_kwargs:
+    function_types: ['linear', 'quadratic', 'neural_net', 'decision_tree']
+    weights: [0.25, 0.25, 0.25, 0.25]  # Equal distribution
+
+# ── output & logging ───────────────────────────────────────────────────────────
+out_dir: ../models/mixed_function
+
+wandb:
+  name: mixed_function_all_types   # appears on your wandb dashboard

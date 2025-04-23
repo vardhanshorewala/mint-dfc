@@ -1,5 +1,7 @@
 wandb:
     project: in-context-training
-    entity: your-entity
+    entity: ashokrd
     notes:
     log_every_steps: 100
+    name: mixed_function_base
+
